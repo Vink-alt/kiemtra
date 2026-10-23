@@ -264,3 +264,15 @@ INSERT INTO fuel_logs (vehicle_id, trip_id, filled_at, liters, price_per_liter, 
  65.00, 21800, 1417000, 37400, 'PVOIL Phạm Hùng - Hà Nội',
  (SELECT id FROM users WHERE username = 'dieuphoi02'));
 
+
+-- =============================================================================
+-- EXPORTER ROLE FOR PROMETHEUS POSTGRES_EXPORTER
+-- =============================================================================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'exporter') THEN
+    CREATE ROLE exporter WITH LOGIN PASSWORD 'FleetExporter@2026!';
+    GRANT pg_monitor TO exporter;
+  END IF;
+END
+$$;
