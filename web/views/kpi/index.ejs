@@ -1,0 +1,117 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Dashboard Báo cáo KPI & Hiệu suất Đội xe</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Thống kê tổng hợp chi phí nhiên liệu, bảo dưỡng và tỷ lệ vận hành xe trong tháng</p>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-title">Tổng số phương tiện</div>
+      <div class="kpi-value"><%= vStats.total_vehicles %></div>
+      <div class="kpi-subtitle">
+        Sẵn sàng: <strong style="color: var(--success);"><%= vStats.available_count %></strong> | Bảo dưỡng: <strong><%= vStats.maintenance_count %></strong>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Tỷ lệ xe đang chạy</div>
+      <div class="kpi-value" style="color: var(--primary);"><%= inUsePct %>%</div>
+      <div class="kpi-subtitle">
+        Đang trên tuyến: <strong><%= vStats.in_use_count %></strong> xe / <%= vStats.total_vehicles %> xe
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Cảnh báo đến hạn</div>
+      <div class="kpi-value" style="color: <%= totalAlerts > 0 ? 'var(--danger)' : 'var(--success)' %>;"><%= totalAlerts %></div>
+      <div class="kpi-subtitle">
+        Bảo dưỡng: <%= alertStats.service_alerts %> | ĐK/BH: <%= alertStats.doc_alerts %> | GPLX: <%= alertStats.driver_alerts %>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Tổng quãng đường tháng</div>
+      <div class="kpi-value" style="color: #059669;"><%= Number(mStats.month_km).toLocaleString('vi-VN') %> <span style="font-size: 1rem; font-weight: 500;">km</span></div>
+      <div class="kpi-subtitle">Từ các chuyến hoàn thành trong tháng</div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Tổng chi phí vận hành tháng</div>
+      <div class="kpi-value" style="font-size: 1.45rem; color: #b91c1c;">
+        <%= Number(Number(mStats.month_fuel_cost) + Number(mStats.month_maint_cost)).toLocaleString('vi-VN') %> <span style="font-size: 0.85rem; font-weight: 500;">VNĐ</span>
+      </div>
+      <div class="kpi-subtitle">
+        Nhiên liệu: <%= Number(mStats.month_fuel_cost).toLocaleString('vi-VN') %> | Bảo dưỡng: <%= Number(mStats.month_maint_cost).toLocaleString('vi-VN') %>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIỂU ĐỒ VÀ BẢNG CHI PHÍ NHIÊN LIỆU THEO XE (PURE CSS/SVG BAR CHART) -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+    <!-- BIỂU ĐỒ CỘT THUẦN CSS/SVG -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Top xe chi phí nhiên liệu cao nhất</h3>
+      </div>
+      <div style="margin-top: 1rem;">
+        <% 
+          const maxCost = vehicleFuelStats.length > 0 ? Math.max(...vehicleFuelStats.map(f => Number(f.total_cost))) : 1;
+        %>
+        <% if (vehicleFuelStats.length === 0 || maxCost === 0) { %>
+          <p style="color: var(--muted); text-align: center; padding: 2rem;">Chưa có dữ liệu nhiên liệu</p>
+        <% } %>
+        <% vehicleFuelStats.forEach(f => { %>
+          <% const pct = maxCost > 0 ? Math.round((Number(f.total_cost) / maxCost) * 100) : 0; %>
+          <div style="margin-bottom: 0.85rem;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.2rem;">
+              <strong><%= f.plate_number %> (<%= f.make %> <%= f.model %>)</strong>
+              <span><%= Number(f.total_cost).toLocaleString('vi-VN') %> VNĐ (<%= f.total_liters %> L)</span>
+            </div>
+            <div style="background: #e2e8f0; border-radius: 999px; height: 12px; overflow: hidden;">
+              <div style="width: <%= pct %>%; background: linear-gradient(90deg, #3b82f6, #1d4ed8); height: 100%; border-radius: 999px;"></div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <!-- BẢNG TOP XE THEO SỐ KM CÔNG TƠ MÉT -->
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Top 5 Phương tiện di chuyển nhiều nhất</h3>
+      </div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Biển số</th>
+              <th>Phương tiện</th>
+              <th>Phân loại</th>
+              <th>Số km hiện tại</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% topVehicles.forEach(v => { %>
+              <tr>
+                <td><a href="/vehicles/<%= v.id %>" class="vehicle-plate" style="font-size: 0.95rem;"><%= v.plate_number %></a></td>
+                <td><%= v.make %> <%= v.model %></td>
+                <td><%= v.type_name %></td>
+                <td><strong style="color: var(--primary);"><%= Number(v.odometer_km).toLocaleString('vi-VN') %> km</strong></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

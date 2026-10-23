@@ -1,0 +1,113 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Danh mục Đội xe</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Tổng số: <strong><%= totalVehicles %></strong> phương tiện</p>
+    </div>
+    <% if (user.role === 'admin') { %>
+      <a href="/vehicles/create" class="btn btn-primary">+ Thêm phương tiện mới</a>
+    <% } %>
+  </div>
+
+  <div class="card" style="padding: 1rem 1.25rem;">
+    <form action="/vehicles" method="GET" class="form-grid" style="align-items: flex-end;">
+      <div>
+        <label class="form-label">Tìm kiếm</label>
+        <input type="text" name="search" class="form-control" placeholder="Biển số, hãng, mẫu..." value="<%= filters.search || '' %>">
+      </div>
+      <div>
+        <label class="form-label">Loại xe</label>
+        <select name="type" class="form-control">
+          <option value="">-- Tất cả loại xe --</option>
+          <% types.forEach(t => { %>
+            <option value="<%= t.id %>" <%= filters.type == t.id ? 'selected' : '' %>><%= t.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Trạng thái</label>
+        <select name="status" class="form-control">
+          <option value="">-- Tất cả trạng thái --</option>
+          <option value="available" <%= filters.status === 'available' ? 'selected' : '' %>>Sẵn sàng</option>
+          <option value="in_use" <%= filters.status === 'in_use' ? 'selected' : '' %>>Đang chạy</option>
+          <option value="maintenance" <%= filters.status === 'maintenance' ? 'selected' : '' %>>Bảo dưỡng</option>
+          <option value="retired" <%= filters.status === 'retired' ? 'selected' : '' %>>Thanh lý</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Nhiên liệu</label>
+        <select name="fuel" class="form-control">
+          <option value="">-- Tất cả nhiên liệu --</option>
+          <option value="gasoline" <%= filters.fuel === 'gasoline' ? 'selected' : '' %>>Xăng</option>
+          <option value="diesel" <%= filters.fuel === 'diesel' ? 'selected' : '' %>>Dầu</option>
+          <option value="hybrid" <%= filters.fuel === 'hybrid' ? 'selected' : '' %>>Hybrid</option>
+          <option value="electric" <%= filters.fuel === 'electric' ? 'selected' : '' %>>Điện</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Sắp xếp</label>
+        <select name="sort" class="form-control">
+          <option value="plate" <%= filters.sort === 'plate' ? 'selected' : '' %>>Biển số</option>
+          <option value="year" <%= filters.sort === 'year' ? 'selected' : '' %>>Năm SX</option>
+          <option value="km" <%= filters.sort === 'km' ? 'selected' : '' %>>Số km</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="submit" class="btn btn-primary" style="flex: 1;">Lọc</button>
+        <a href="/vehicles" class="btn btn-outline">Đặt lại</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="vehicle-grid">
+    <% if (vehicles.length === 0) { %>
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: #fff; border-radius: 8px;">
+        <p style="color: var(--muted); font-size: 1.1rem;">Không tìm thấy phương tiện nào phù hợp.</p>
+      </div>
+    <% } %>
+    <% vehicles.forEach(v => { %>
+      <div class="vehicle-card">
+        <img src="<%= v.image_path || '/images/vehicles/sedan.svg' %>" alt="<%= v.plate_number %>" class="vehicle-card-img">
+        <div class="vehicle-card-body">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span class="vehicle-plate"><%= v.plate_number %></span>
+              <span class="badge badge-<%= v.status %>"><%= v.status %></span>
+            </div>
+            <h3 style="font-size: 1.05rem; font-weight: 600; color: var(--dark);"><%= v.make %> <%= v.model %></h3>
+            <div class="vehicle-specs">
+              <span>🏷️ <%= v.type_name %></span>
+              <span>📅 <%= v.year %></span>
+              <span>💺 <%= v.seats %> chỗ</span>
+              <span>⛽ <%= v.fuel_type %></span>
+            </div>
+            <div style="font-size: 0.875rem; color: var(--slate); margin-top: 0.25rem;">
+              Công tơ mét: <strong><%= Number(v.odometer_km).toLocaleString('vi-VN') %> km</strong>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px solid var(--border);">
+            <a href="/vehicles/<%= v.id %>" class="btn btn-outline btn-sm" style="width: 100%;">Xem chi tiết & Lịch sử &rarr;</a>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+
+  <% if (totalPages > 1) { %>
+    <div style="display: flex; justify-content: center; gap: 0.5rem; margin-top: 2rem;">
+      <% for (let p = 1; p <= totalPages; p++) { %>
+        <a href="/vehicles?page=<%= p %>&search=<%= filters.search || '' %>&type=<%= filters.type || '' %>&status=<%= filters.status || '' %>&fuel=<%= filters.fuel || '' %>&sort=<%= filters.sort || '' %>" 
+           class="btn <%= filters.page === p ? 'btn-primary' : 'btn-outline' %> btn-sm">
+          <%= p %>
+        </a>
+      <% } %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

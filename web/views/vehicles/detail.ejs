@@ -1,0 +1,124 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <a href="/vehicles" class="btn btn-outline btn-sm" style="margin-bottom: 0.5rem;">&larr; Quay lại danh sách xe</a>
+      <h1 class="card-title" style="font-size: 1.75rem;">Hồ sơ Xe: <%= vehicle.plate_number %></h1>
+      <p style="color: var(--muted);"><%= vehicle.make %> <%= vehicle.model %> (<%= vehicle.year %>) - <%= vehicle.type_name %></p>
+    </div>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+      <span class="badge badge-<%= vehicle.status %>" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;"><%= vehicle.status %></span>
+      <% if (user.role === 'admin' && vehicle.status !== 'retired') { %>
+        <form action="/vehicles/<%= vehicle.id %>/retire" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn thanh lý xe này không?');" style="margin: 0;">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn-danger btn-sm">Thanh lý xe (Retire)</button>
+        </form>
+      <% } %>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+    <div class="card" style="text-align: center;">
+      <img src="<%= vehicle.image_path || '/images/vehicles/sedan.svg' %>" alt="<%= vehicle.plate_number %>" style="width: 100%; max-height: 200px; object-fit: contain; margin-bottom: 1rem;">
+      <h3 style="font-size: 1.25rem; color: var(--primary);"><%= vehicle.plate_number %></h3>
+      <p style="color: var(--muted); font-size: 0.875rem;">VIN: <%= vehicle.vin || 'Chưa cập nhật' %></p>
+    </div>
+
+    <div class="card">
+      <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Thông số & Hạn kiểm định</h3>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; font-size: 0.925rem;">
+        <div>Công tơ mét: <strong><%= Number(vehicle.odometer_km).toLocaleString('vi-VN') %> km</strong></div>
+        <div>Mức tiêu thụ TB: <strong><%= avgConsumption ? avgConsumption + ' L/100 km' : 'Chưa đủ dữ liệu' %></strong></div>
+        <div>Nhiên liệu: <strong style="text-transform: capitalize;"><%= vehicle.fuel_type %></strong></div>
+        <div>Số chỗ: <strong><%= vehicle.seats %> chỗ</strong></div>
+        <div>Hạn đăng kiểm: <strong style="color: #b91c1c;"><%= new Date(vehicle.registration_expiry).toLocaleDateString('vi-VN') %></strong></div>
+        <div>Hạn bảo hiểm: <strong style="color: #b91c1c;"><%= new Date(vehicle.insurance_expiry).toLocaleDateString('vi-VN') %></strong></div>
+        <div>Bảo dưỡng kế tiếp: <strong><%= Number(vehicle.next_service_km).toLocaleString('vi-VN') %> km</strong></div>
+        <div>Ngày nhập đội: <strong><%= new Date(vehicle.created_at).toLocaleDateString('vi-VN') %></strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h3 class="card-title">Lịch sử Chuyến xe gần đây</h3></div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã chuyến</th>
+            <th>Tài xế</th>
+            <th>Lộ trình</th>
+            <th>Thời gian dự kiến</th>
+            <th>Trạng thái</th>
+            <th>Quãng đường</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (trips.length === 0) { %><tr><td colspan="6" style="text-align: center; color: var(--muted);">Chưa có chuyến xe nào</td></tr><% } %>
+          <% trips.forEach(t => { %>
+            <tr>
+              <td><strong><%= t.trip_code %></strong></td>
+              <td><%= t.driver_name %></td>
+              <td><%= t.origin %> &rarr; <%= t.destination %></td>
+              <td><%= new Date(t.planned_start).toLocaleString('vi-VN') %></td>
+              <td><span class="badge badge-<%= t.status %>"><%= t.status %></span></td>
+              <td><%= t.distance_km ? t.distance_km + ' km' : '-' %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Lịch sử Bảo dưỡng</h3></div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr><th>Ngày</th><th>Loại</th><th>Mô tả</th><th>Chi phí (VNĐ)</th></tr>
+          </thead>
+          <tbody>
+            <% if (maintenance.length === 0) { %><tr><td colspan="4" style="text-align: center; color: var(--muted);">Chưa có bảo dưỡng</td></tr><% } %>
+            <% maintenance.forEach(m => { %>
+              <tr>
+                <td><%= new Date(m.serviced_at).toLocaleDateString('vi-VN') %></td>
+                <td><span class="badge badge-warning"><%= m.type %></span></td>
+                <td><%= m.description %></td>
+                <td><strong><%= Number(m.cost).toLocaleString('vi-VN') %></strong></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h3 class="card-title">Lịch sử Đổ Nhiên liệu</h3></div>
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr><th>Thời gian</th><th>Lít</th><th>Đơn giá</th><th>Thành tiền (VNĐ)</th></tr>
+          </thead>
+          <tbody>
+            <% if (fuelLogs.length === 0) { %><tr><td colspan="4" style="text-align: center; color: var(--muted);">Chưa có nhiên liệu</td></tr><% } %>
+            <% fuelLogs.forEach(f => { %>
+              <tr>
+                <td><%= new Date(f.filled_at).toLocaleDateString('vi-VN') %></td>
+                <td><%= f.liters %> L</td>
+                <td><%= Number(f.price_per_liter).toLocaleString('vi-VN') %></td>
+                <td><strong><%= Number(f.total_cost).toLocaleString('vi-VN') %></strong></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

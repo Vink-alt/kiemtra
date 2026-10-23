@@ -1,0 +1,33 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Certificates & private keys
+nginx/certs/*.key
+nginx/certs/*.crt
+*.pem
+
+# Dependencies
+node_modules/
+package-lock.json.bak
+
+# Evidence & audit notes
+evidence/
+docs/AUDIT.md
+
+# User uploads (keep directory via .gitkeep)
+web/public/uploads/*
+!web/public/uploads/.gitkeep
+
+# Docker overrides & logs
+docker-compose.override.yml
+*.log
+logs/
+
+# Volumes & database local data
+data/
+pgdata/
+grafana_data/
+prometheus_data/
+loki_data/

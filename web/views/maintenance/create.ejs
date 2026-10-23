@@ -1,0 +1,91 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container" style="max-width: 750px;">
+  <%- include('../partials/alerts') %>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Lập Phiếu Bảo dưỡng / Sửa chữa Phương tiện</h2>
+      <a href="/maintenance" class="btn btn-outline btn-sm">&larr; Hủy</a>
+    </div>
+
+    <form action="/maintenance/create" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="vehicle_id">Chọn Phương tiện *</label>
+          <select id="vehicle_id" name="vehicle_id" class="form-control" required onchange="updateOdo(this)">
+            <option value="">-- Chọn xe --</option>
+            <% vehicles.forEach(v => { %>
+              <option value="<%= v.id %>" data-odo="<%= v.odometer_km %>" data-status="<%= v.status %>"><%= v.plate_number %> - <%= v.make %> <%= v.model %> (Trạng thái: <%= v.status %> - Hiện tại: <%= v.odometer_km %> km)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="type">Loại hình bảo dưỡng *</label>
+          <select id="type" name="type" class="form-control" required>
+            <option value="routine">Bảo dưỡng định kỳ (routine)</option>
+            <option value="repair">Sửa chữa khắc phục (repair)</option>
+            <option value="inspection">Đăng kiểm / Đại tu (inspection)</option>
+            <option value="tire">Thay lốp / Cân mâm (tire)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="serviced_at">Ngày thực hiện *</label>
+          <input type="date" id="serviced_at" name="serviced_at" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="cost">Chi phí (VNĐ) * (&ge; 0)</label>
+          <input type="number" id="cost" name="cost" class="form-control" placeholder="1500000" min="0" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="odometer_km">Số km công tơ mét lúc làm *</label>
+          <input type="number" id="odometer_km" name="odometer_km" class="form-control" placeholder="25000" min="0" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="next_due_km">Số km bảo dưỡng kế tiếp (Nếu có)</label>
+          <input type="number" id="next_due_km" name="next_due_km" class="form-control" placeholder="35000" min="0">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="set_maintenance_status">Trạng thái xe sau khi lưu *</label>
+          <select id="set_maintenance_status" name="set_maintenance_status" class="form-control" required>
+            <option value="no">Đã hoàn thành xong &rarr; Xe Sẵn sàng (Available)</option>
+            <option value="yes">Đang nằm xưởng &rarr; Đưa xe vào Bảo dưỡng (Maintenance)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="description">Chi tiết công việc sửa chữa & phụ tùng thay thế *</label>
+          <textarea id="description" name="description" class="form-control" rows="3" placeholder="Thay dầu máy, lọc gió động cơ, kiểm tra má phanh..." required></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+        <a href="/maintenance" class="btn btn-outline">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary">Lưu phiếu bảo dưỡng</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.getElementById('serviced_at').value = new Date().toISOString().slice(0, 10);
+  function updateOdo(sel) {
+    const opt = sel.options[sel.selectedIndex];
+    const odo = opt.getAttribute('data-odo');
+    if (odo) {
+      document.getElementById('odometer_km').value = odo;
+      document.getElementById('next_due_km').value = parseInt(odo) + 10000;
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>

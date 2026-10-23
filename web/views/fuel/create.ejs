@@ -1,0 +1,86 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container" style="max-width: 700px;">
+  <%- include('../partials/alerts') %>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Ghi nhận Lần Đổ Nhiên liệu</h2>
+      <a href="/fuel" class="btn btn-outline btn-sm">&larr; Hủy</a>
+    </div>
+
+    <form action="/fuel/create" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="vehicle_id">Phương tiện *</label>
+          <select id="vehicle_id" name="vehicle_id" class="form-control" required>
+            <option value="">-- Chọn phương tiện --</option>
+            <% vehicles.forEach(v => { %>
+              <option value="<%= v.id %>"><%= v.plate_number %> - <%= v.make %> <%= v.model %> (Hiện tại: <%= v.odometer_km %> km)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="trip_id">Chuyến xe liên quan (Tùy chọn)</label>
+          <select id="trip_id" name="trip_id" class="form-control">
+            <option value="">-- Không gắn chuyến cụ thể / Đổ định kỳ --</option>
+            <% trips.forEach(t => { %>
+              <option value="<%= t.id %>"><%= t.trip_code %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="filled_at">Thời gian đổ *</label>
+          <input type="datetime-local" id="filled_at" name="filled_at" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="liters">Số lít * (&gt; 0)</label>
+          <input type="number" step="0.01" id="liters" name="liters" class="form-control" placeholder="40.5" required oninput="calcTotal()">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="price_per_liter">Đơn giá / Lít (VNĐ) *</label>
+          <input type="number" id="price_per_liter" name="price_per_liter" class="form-control" placeholder="24500" value="24000" required oninput="calcTotal()">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="odometer_km">Số km công tơ mét lúc đổ *</label>
+          <input type="number" id="odometer_km" name="odometer_km" class="form-control" placeholder="35000" required>
+        </div>
+
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="station">Cây xăng / Trạm cấp phát</label>
+          <input type="text" id="station" name="station" class="form-control" placeholder="Petrolimex Cầu Giấy, Kho Hà Đông...">
+        </div>
+      </div>
+
+      <div style="background: #f1f5f9; padding: 1rem; border-radius: 6px; margin: 1rem 0; font-size: 1.1rem; text-align: right;">
+        Thành tiền dự kiến: <strong id="total_display" style="color: var(--primary);">0 VNĐ</strong>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <a href="/fuel" class="btn btn-outline">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary">Lưu hóa đơn nhiên liệu</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function calcTotal() {
+    const l = parseFloat(document.getElementById('liters').value) || 0;
+    const p = parseFloat(document.getElementById('price_per_liter').value) || 0;
+    const t = Math.round(l * p);
+    document.getElementById('total_display').innerText = t.toLocaleString('vi-VN') + ' VNĐ';
+  }
+  // Default current date
+  document.getElementById('filled_at').value = new Date().toISOString().slice(0, 16);
+</script>
+
+<%- include('../partials/footer') %>

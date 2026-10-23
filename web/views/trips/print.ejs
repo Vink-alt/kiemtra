@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Phiếu Lệnh Điều Xe - <%= trip.trip_code %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { background: #fff; padding: 2rem; }
+    .print-container { max-width: 800px; margin: 0 auto; border: 2px solid #0f172a; padding: 2.5rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="print-container">
+    <div class="print-header">
+      <div>
+        <h2 style="font-size: 1.5rem; text-transform: uppercase; margin-bottom: 0.25rem;">LỆNH ĐIỀU ĐỘNG XE & PHÂN CÔNG TÀI XẾ</h2>
+        <p style="color: #475569; font-size: 0.9rem;">HỆ THỐNG QUẢN LÝ ĐỘI XE - FLEET MANAGEMENT</p>
+      </div>
+      <div>
+        <img src="<%= qrDataUrl %>" alt="QR Code" style="width: 110px; height: 110px;">
+        <div style="text-align: center; font-size: 0.8rem; font-weight: 700;"><%= trip.trip_code %></div>
+      </div>
+    </div>
+
+    <div style="margin: 1.5rem 0; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.95rem;">
+      <div>Mã số chuyến: <strong><%= trip.trip_code %></strong></div>
+      <div>Trạng thái: <strong><%= trip.status.toUpperCase() %></strong></div>
+      <div>Biển số phương tiện: <strong style="font-size: 1.1rem;"><%= trip.plate_number %></strong></div>
+      <div>Hãng & Dòng xe: <strong><%= trip.make %> <%= trip.model %> (<%= trip.seats %> chỗ)</strong></div>
+      <div>Họ tên tài xế: <strong style="font-size: 1.1rem;"><%= trip.driver_name %></strong></div>
+      <div>Giấy phép lái xe: <strong><%= trip.license_number %> (Hạng <%= trip.license_class %>)</strong></div>
+      <div>Số điện thoại tài xế: <strong><%= trip.driver_phone || 'Chưa cập nhật' %></strong></div>
+      <div>Người điều phối lệnh: <strong><%= trip.creator_name %></strong></div>
+    </div>
+
+    <div style="border-top: 1px dashed #cbd5e1; border-bottom: 1px dashed #cbd5e1; padding: 1rem 0; margin: 1.5rem 0;">
+      <h4 style="margin-bottom: 0.5rem; text-transform: uppercase;">Lộ trình & Mục đích vận chuyển:</h4>
+      <div style="font-size: 1rem; margin-bottom: 0.5rem;">
+        Khởi hành: <strong><%= trip.origin %></strong> &rarr; Đến: <strong><%= trip.destination %></strong>
+      </div>
+      <div style="font-size: 0.9rem; color: #334155;">
+        Mục đích: <em><%= trip.purpose || 'Theo yêu cầu công việc của cơ quan/đơn vị' %></em>
+      </div>
+      <div style="font-size: 0.9rem; margin-top: 0.5rem;">
+        Thời gian dự kiến: <strong><%= new Date(trip.planned_start).toLocaleString('vi-VN') %></strong> đến <strong><%= new Date(trip.planned_end).toLocaleString('vi-VN') %></strong>
+      </div>
+    </div>
+
+    <div class="print-signatures">
+      <div class="print-sig-box">
+        <strong>TÀI XẾ NHẬN LỆNH</strong>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">(Ký & ghi rõ họ tên)</p>
+        <div style="height: 60px;"></div>
+        <div><%= trip.driver_name %></div>
+      </div>
+      <div class="print-sig-box">
+        <strong>ĐIỀU PHỐI VIÊN</strong>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">(Ký & ghi rõ họ tên)</p>
+        <div style="height: 60px;"></div>
+        <div><%= trip.creator_name %></div>
+      </div>
+      <div class="print-sig-box">
+        <strong>THỦ TRƯỞNG DUYỆT</strong>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 0.25rem;">(Ký, đóng dấu)</p>
+        <div style="height: 60px;"></div>
+        <div>Đã phê duyệt</div>
+      </div>
+    </div>
+
+    <div class="no-print" style="margin-top: 2rem; text-align: center;">
+      <button onclick="window.print()" class="btn btn-primary">In phiếu ngay (Print)</button>
+      <button onclick="window.close()" class="btn btn-outline">Đóng cửa sổ</button>
+    </div>
+  </div>
+</body>
+</html>

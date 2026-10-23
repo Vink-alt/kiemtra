@@ -1,0 +1,70 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Quản lý Bảo dưỡng & Sửa chữa</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Theo dõi lịch trình, nhật ký sửa chữa kỹ thuật và chi phí bảo trì</p>
+    </div>
+    <a href="/maintenance/create" class="btn btn-primary">+ Tạo phiếu bảo dưỡng mới</a>
+  </div>
+
+  <div class="card" style="padding: 1rem 1.25rem;">
+    <form action="/maintenance" method="GET" style="display: flex; gap: 1rem; align-items: flex-end;">
+      <div style="flex: 1; max-width: 300px;">
+        <label class="form-label">Loại bảo dưỡng</label>
+        <select name="type" class="form-control">
+          <option value="">-- Tất cả các loại --</option>
+          <option value="routine" <%= filters.type === 'routine' ? 'selected' : '' %>>Định kỳ (routine)</option>
+          <option value="repair" <%= filters.type === 'repair' ? 'selected' : '' %>>Sửa chữa hư hỏng (repair)</option>
+          <option value="inspection" <%= filters.type === 'inspection' ? 'selected' : '' %>>Kiểm định / Đại tu (inspection)</option>
+          <option value="tire" <%= filters.type === 'tire' ? 'selected' : '' %>>Thay lốp (tire)</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Lọc</button>
+      <a href="/maintenance" class="btn btn-outline">Đặt lại</a>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Ngày thực hiện</th>
+            <th>Phương tiện</th>
+            <th>Loại</th>
+            <th>Nội dung công việc</th>
+            <th>Chi phí (VNĐ)</th>
+            <th>Km lúc làm</th>
+            <th>Km hạn tới</th>
+            <th>Người thực hiện</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (records.length === 0) { %><tr><td colspan="8" style="text-align: center; color: var(--muted);">Chưa có phiếu bảo dưỡng nào</td></tr><% } %>
+          <% records.forEach(m => { %>
+            <tr>
+              <td><%= new Date(m.serviced_at).toLocaleDateString('vi-VN') %></td>
+              <td>
+                <span class="vehicle-plate" style="font-size: 0.95rem;"><%= m.plate_number %></span><br>
+                <small><%= m.make %> <%= m.model %></small>
+              </td>
+              <td><span class="badge badge-warning"><%= m.type %></span></td>
+              <td><%= m.description %></td>
+              <td><strong style="color: var(--danger);"><%= Number(m.cost).toLocaleString('vi-VN') %></strong></td>
+              <td><%= Number(m.odometer_km).toLocaleString('vi-VN') %> km</td>
+              <td><%= m.next_due_km ? Number(m.next_due_km).toLocaleString('vi-VN') + ' km' : '-' %></td>
+              <td><%= m.tech_name %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

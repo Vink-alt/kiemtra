@@ -1,0 +1,71 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container" style="max-width: 800px;">
+  <%- include('../partials/alerts') %>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Tạo mới Lệnh Điều phối Chuyến xe</h2>
+      <a href="/trips" class="btn btn-outline btn-sm">&larr; Hủy</a>
+    </div>
+
+    <form action="/trips/create" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-grid">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="vehicle_id">Chọn Phương tiện Sẵn sàng (Available) *</label>
+          <select id="vehicle_id" name="vehicle_id" class="form-control" required>
+            <option value="">-- Chọn xe --</option>
+            <% vehicles.forEach(v => { %>
+              <option value="<%= v.id %>"><%= v.plate_number %> - <%= v.make %> <%= v.model %> (<%= v.type_name %> - <%= v.seats %> chỗ - Hiện tại: <%= v.odometer_km %> km)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="driver_id">Chọn Tài xế (Đang hoạt động & Bằng lái còn hạn) *</label>
+          <select id="driver_id" name="driver_id" class="form-control" required>
+            <option value="">-- Chọn tài xế --</option>
+            <% drivers.forEach(d => { %>
+              <option value="<%= d.id %>"><%= d.full_name %> (GPLX: <%= d.license_number %> - Hạng <%= d.license_class %> - Hạn: <%= new Date(d.license_expiry).toLocaleDateString('vi-VN') %>)</option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="origin">Điểm khởi hành *</label>
+          <input type="text" id="origin" name="origin" class="form-control" placeholder="Trụ sở Hà Nội, Kho tổng..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="destination">Điểm đến *</label>
+          <input type="text" id="destination" name="destination" class="form-control" placeholder="Sân bay Nội Bài, Cảng Đình Vũ..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="planned_start">Thời gian dự kiến bắt đầu *</label>
+          <input type="datetime-local" id="planned_start" name="planned_start" class="form-control" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="planned_end">Thời gian dự kiến kết thúc *</label>
+          <input type="datetime-local" id="planned_end" name="planned_end" class="form-control" required>
+        </div>
+
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label" for="purpose">Mục đích chuyến đi / Yêu cầu công việc</label>
+          <textarea id="purpose" name="purpose" class="form-control" rows="3" placeholder="Đưa đón chuyên gia, chở thiết bị hàng hóa..."></textarea>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+        <a href="/trips" class="btn btn-outline">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary">Xác nhận tạo lệnh điều xe</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

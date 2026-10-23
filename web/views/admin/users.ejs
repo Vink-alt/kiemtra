@@ -1,0 +1,76 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Quản trị Tài khoản Người dùng</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Quản lý danh sách tài xế, điều phối viên và quản trị viên</p>
+    </div>
+    <a href="/admin/users/create" class="btn btn-primary">+ Tạo tài khoản mới</a>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên đăng nhập</th>
+            <th>Họ và tên</th>
+            <th>Email / Số ĐT</th>
+            <th>Vai trò (Role)</th>
+            <th>Thông tin GPLX (Nếu là tài xế)</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% usersList.forEach(u => { %>
+            <tr>
+              <td><%= u.id %></td>
+              <td><strong><%= u.username %></strong></td>
+              <td><%= u.full_name %></td>
+              <td>
+                <div><%= u.email %></div>
+                <small style="color: var(--muted);"><%= u.phone || 'Chưa có SĐT' %></small>
+              </td>
+              <td><span class="badge-role role-<%= u.role %>"><%= u.role %></span></td>
+              <td>
+                <% if (u.role === 'driver') { %>
+                  <div>GPLX: <code><%= u.license_number %></code> (Hạng <%= u.license_class %>)</div>
+                  <small style="color: var(--slate);">Hạn: <%= u.license_expiry ? new Date(u.license_expiry).toLocaleDateString('vi-VN') : '-' %></small>
+                <% } else { %>
+                  <span style="color: var(--muted);">-</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (u.is_active) { %>
+                  <span class="badge badge-available">Đang hoạt động</span>
+                <% } else { %>
+                  <span class="badge badge-danger">Đang bị khóa</span>
+                <% } %>
+              </td>
+              <td>
+                <% if (user.id === u.id) { %>
+                  <span style="font-size: 0.8rem; color: var(--muted);">Tài khoản hiện tại</span>
+                <% } else { %>
+                  <form action="/admin/users/<%= u.id %>/toggle" method="POST" style="margin: 0;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <button type="submit" class="btn btn-sm <%= u.is_active ? 'btn-danger' : 'btn-success' %>">
+                      <%= u.is_active ? 'Khóa' : 'Mở khóa' %>
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

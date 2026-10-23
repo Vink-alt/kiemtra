@@ -1,0 +1,11 @@
+<% if (successMsg) { %>
+  <div class="alert-box alert-success">
+    <span><strong>Thành công!</strong> <%= successMsg %></span>
+  </div>
+<% } %>
+
+<% if (errorMsg) { %>
+  <div class="alert-box alert-error">
+    <span><strong>Thông báo:</strong> <%= errorMsg %></span>
+  </div>
+<% } %>

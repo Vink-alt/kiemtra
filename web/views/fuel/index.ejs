@@ -1,0 +1,55 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Nhật ký Đổ Nhiên liệu</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Theo dõi lượng xăng dầu tiêu thụ và chi phí vận hành</p>
+    </div>
+    <a href="/fuel/create" class="btn btn-primary">+ Ghi nhận đổ nhiên liệu</a>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Thời gian</th>
+            <th>Phương tiện</th>
+            <th>Chuyến xe</th>
+            <th>Số lít</th>
+            <th>Đơn giá (VNĐ)</th>
+            <th>Thành tiền (VNĐ)</th>
+            <th>Công tơ mét</th>
+            <th>Cây xăng / Trạm</th>
+            <th>Người ghi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (logs.length === 0) { %><tr><td colspan="9" style="text-align: center; color: var(--muted);">Chưa có nhật ký nhiên liệu</td></tr><% } %>
+          <% logs.forEach(f => { %>
+            <tr>
+              <td><%= new Date(f.filled_at).toLocaleString('vi-VN') %></td>
+              <td>
+                <span class="vehicle-plate" style="font-size: 0.95rem;"><%= f.plate_number %></span><br>
+                <small><%= f.make %> <%= f.model %></small>
+              </td>
+              <td><%= f.trip_code ? f.trip_code : '-' %></td>
+              <td><strong><%= f.liters %> L</strong></td>
+              <td><%= Number(f.price_per_liter).toLocaleString('vi-VN') %></td>
+              <td><strong style="color: var(--primary);"><%= Number(f.total_cost).toLocaleString('vi-VN') %></strong></td>
+              <td><%= Number(f.odometer_km).toLocaleString('vi-VN') %> km</td>
+              <td><%= f.station || 'Trạm nội bộ' %></td>
+              <td><%= f.recorder_name %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container" style="max-width: 800px;">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Quản lý Danh mục Loại xe</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Cấu hình phân loại phương tiện trong đội xe</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <h3 style="font-size: 1.1rem; margin-bottom: 1rem;">+ Thêm phân loại xe mới</h3>
+    <form action="/admin/vehicle-types" method="POST" style="display: flex; gap: 1rem;">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div style="flex: 2;">
+        <input type="text" name="name" class="form-control" placeholder="Tên loại xe (VD: Xe đông lạnh, Xe cứu hộ...)" required>
+      </div>
+      <div style="flex: 1;">
+        <input type="number" name="sort_order" class="form-control" placeholder="Thứ tự (1, 2, 3...)" value="10">
+      </div>
+      <button type="submit" class="btn btn-primary">Thêm mới</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên loại xe</th>
+            <th>Thứ tự sắp xếp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% types.forEach(t => { %>
+            <tr>
+              <td><%= t.id %></td>
+              <td><strong><%= t.name %></strong></td>
+              <td><%= t.sort_order %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

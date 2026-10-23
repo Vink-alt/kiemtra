@@ -1,0 +1,81 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Chuyến xe được Phân công</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Tài xế: <strong><%= user.full_name %></strong></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã chuyến</th>
+            <th>Phương tiện</th>
+            <th>Lộ trình</th>
+            <th>Thời gian dự kiến</th>
+            <th>Trạng thái</th>
+            <th>Thao tác tài xế</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (trips.length === 0) { %>
+            <tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">Hiện tại bạn chưa được phân công chuyến xe nào.</td></tr>
+          <% } %>
+          <% trips.forEach(t => { %>
+            <tr>
+              <td>
+                <strong><%= t.trip_code %></strong><br>
+                <a href="/trips/<%= t.id %>/print" target="_blank" style="font-size: 0.8rem; color: var(--primary);">🖨️ Xem lệnh điều xe</a>
+              </td>
+              <td>
+                <span class="vehicle-plate" style="font-size: 0.95rem;"><%= t.plate_number %></span><br>
+                <small><%= t.make %> <%= t.model %></small><br>
+                <small style="color: var(--muted);">Km xe hiện tại: <%= t.current_vehicle_km %> km</small>
+              </td>
+              <td>
+                <div><%= t.origin %> &rarr; <strong><%= t.destination %></strong></div>
+                <% if (t.purpose) { %><small style="color: var(--slate);"><%= t.purpose %></small><% } %>
+              </td>
+              <td>
+                <div><%= new Date(t.planned_start).toLocaleString('vi-VN') %></div>
+                <small style="color: var(--muted);">Đến: <%= new Date(t.planned_end).toLocaleString('vi-VN') %></small>
+              </td>
+              <td><span class="badge badge-<%= t.status %>"><%= t.status %></span></td>
+              <td>
+                <% if (t.status === 'planned') { %>
+                  <form action="/trips/<%= t.id %>/start" method="POST" style="display: flex; gap: 0.4rem; align-items: center;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="number" name="start_odometer" class="form-control" style="width: 110px; padding: 0.25rem 0.5rem;" min="<%= t.current_vehicle_km %>" value="<%= t.current_vehicle_km %>" required title="Số km công tơ mét bắt đầu">
+                    <button type="submit" class="btn btn-primary btn-sm">Bắt đầu</button>
+                  </form>
+                <% } else if (t.status === 'in_progress') { %>
+                  <form action="/trips/<%= t.id %>/end" method="POST" style="display: flex; gap: 0.4rem; align-items: center;">
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                    <input type="number" name="end_odometer" class="form-control" style="width: 110px; padding: 0.25rem 0.5rem;" min="<%= t.start_odometer %>" value="<%= (t.start_odometer || t.current_vehicle_km) + 50 %>" required title="Số km công tơ mét kết thúc">
+                    <button type="submit" class="btn btn-success btn-sm">Kết thúc</button>
+                  </form>
+                  <small style="color: var(--muted);">Bắt đầu: <%= t.start_odometer %> km</small>
+                <% } else if (t.status === 'completed') { %>
+                  <div style="font-size: 0.85rem; color: var(--success);">
+                    Đã hoàn tất (<%= t.distance_km %> km)
+                  </div>
+                <% } else { %>
+                  <span style="color: var(--danger); font-size: 0.85rem;">Đã hủy</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,11 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<div class="container" style="max-width: 500px; margin-top: 5rem; text-align: center;">
+  <div class="card">
+    <h1 style="font-size: 3rem; color: var(--danger);">403</h1>
+    <h3 style="margin-bottom: 1rem;"><%= title || 'Truy cập bị từ chối' %></h3>
+    <p style="color: var(--muted); margin-bottom: 1.5rem;"><%= message || 'Bạn không có quyền thực hiện hành động này.' %></p>
+    <a href="/" class="btn btn-primary">Về trang chủ</a>
+  </div>
+</div>
+<%- include('../partials/footer') %>

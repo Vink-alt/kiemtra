@@ -1,0 +1,162 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem; color: #b91c1c;">⚠️ Trung tâm Cảnh báo Hạn Kỹ thuật & Hồ sơ</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Tự động phát hiện phương tiện sắp đến hạn bảo dưỡng, đăng kiểm, bảo hiểm và bằng lái tài xế</p>
+    </div>
+  </div>
+
+  <!-- 1. CẢNH BÁO BẢO DƯỠNG (KM CÒN LẠI <= 500 KM HOẶC QUÁ HẠN) -->
+  <div class="card" style="border-left: 4px solid #ea580c;">
+    <div class="card-header">
+      <h3 class="card-title" style="color: #c2410c;">1. Cảnh báo Xe sắp đến hạn Bảo dưỡng (&le; 500 km hoặc Quá hạn)</h3>
+      <span class="badge badge-warning"><%= serviceAlerts.length %> phương tiện</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Biển số</th>
+            <th>Mẫu xe</th>
+            <th>Loại xe</th>
+            <th>Công tơ mét hiện tại</th>
+            <th>Hạn bảo dưỡng tiếp</th>
+            <th>Số km còn lại</th>
+            <th>Mức độ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (serviceAlerts.length === 0) { %>
+            <tr><td colspan="7" style="text-align: center; color: var(--success); padding: 1.5rem;">🎉 Toàn bộ đội xe đang trong giới hạn bảo dưỡng an toàn!</td></tr>
+          <% } %>
+          <% serviceAlerts.forEach(v => { %>
+            <tr>
+              <td><a href="/vehicles/<%= v.id %>" class="vehicle-plate" style="font-size: 0.95rem;"><%= v.plate_number %></a></td>
+              <td><%= v.make %> <%= v.model %></td>
+              <td><%= v.type_name %></td>
+              <td><%= Number(v.odometer_km).toLocaleString('vi-VN') %> km</td>
+              <td><strong><%= Number(v.next_service_km).toLocaleString('vi-VN') %> km</strong></td>
+              <td>
+                <strong style="color: <%= v.km_remaining <= 0 ? 'var(--danger)' : '#ea580c' %>;">
+                  <%= v.km_remaining <= 0 ? 'Đã quá ' + Math.abs(v.km_remaining) + ' km' : 'Còn ' + v.km_remaining + ' km' %>
+                </strong>
+              </td>
+              <td>
+                <% if (v.km_remaining <= 0) { %>
+                  <span class="badge badge-danger">NGHIÊM TRỌNG (QUÁ HẠN)</span>
+                <% } else { %>
+                  <span class="badge badge-warning">CẢNH BÁO (&le; 500 KM)</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. CẢNH BÁO ĐĂNG KIỂM & BẢO HIỂM XE (<= 30 NGÀY HOẶC ĐÃ HẾT HẠN) -->
+  <div class="card" style="border-left: 4px solid #dc2626;">
+    <div class="card-header">
+      <h3 class="card-title" style="color: #b91c1c;">2. Cảnh báo Hạn Đăng kiểm & Bảo hiểm Phương tiện (&le; 30 ngày hoặc Quá hạn)</h3>
+      <span class="badge badge-danger"><%= documentAlerts.length %> phương tiện</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Biển số</th>
+            <th>Mẫu xe</th>
+            <th>Hạn Đăng kiểm</th>
+            <th>Tình trạng Đăng kiểm</th>
+            <th>Hạn Bảo hiểm</th>
+            <th>Tình trạng Bảo hiểm</th>
+            <th>Chi tiết</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (documentAlerts.length === 0) { %>
+            <tr><td colspan="7" style="text-align: center; color: var(--success); padding: 1.5rem;">🎉 Tất cả xe đều đầy đủ giấy tờ đăng kiểm và bảo hiểm hợp lệ!</td></tr>
+          <% } %>
+          <% documentAlerts.forEach(v => { %>
+            <tr>
+              <td><a href="/vehicles/<%= v.id %>" class="vehicle-plate" style="font-size: 0.95rem;"><%= v.plate_number %></a></td>
+              <td><%= v.make %> <%= v.model %></td>
+              <td><%= new Date(v.registration_expiry).toLocaleDateString('vi-VN') %></td>
+              <td>
+                <% if (v.reg_days_left < 0) { %>
+                  <span class="badge badge-danger">ĐÃ QUÁ HẠN <%= Math.abs(v.reg_days_left) %> NGÀY</span>
+                <% } else if (v.reg_days_left <= 30) { %>
+                  <span class="badge badge-warning">Còn <%= v.reg_days_left %> ngày</span>
+                <% } else { %>
+                  <span class="badge badge-available">Hợp lệ</span>
+                <% } %>
+              </td>
+              <td><%= new Date(v.insurance_expiry).toLocaleDateString('vi-VN') %></td>
+              <td>
+                <% if (v.ins_days_left < 0) { %>
+                  <span class="badge badge-danger">ĐÃ QUÁ HẠN <%= Math.abs(v.ins_days_left) %> NGÀY</span>
+                <% } else if (v.ins_days_left <= 30) { %>
+                  <span class="badge badge-warning">Còn <%= v.ins_days_left %> ngày</span>
+                <% } else { %>
+                  <span class="badge badge-available">Hợp lệ</span>
+                <% } %>
+              </td>
+              <td><a href="/vehicles/<%= v.id %>" class="btn btn-outline btn-sm">Xem xe</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 3. CẢNH BÁO BẰNG LÁI TÀI XẾ (<= 30 NGÀY HOẶC ĐÃ HẾT HẠN) -->
+  <div class="card" style="border-left: 4px solid #7c3aed;">
+    <div class="card-header">
+      <h3 class="card-title" style="color: #6d28d9;">3. Cảnh báo Thời hạn Giấy phép Lái xe (Tài xế)</h3>
+      <span class="badge" style="background: #ede9fe; color: #5b21b6;"><%= driverAlerts.length %> tài xế</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Họ và tên</th>
+            <th>Tài khoản</th>
+            <th>Số GPLX</th>
+            <th>Hạng GPLX</th>
+            <th>Ngày hết hạn</th>
+            <th>Tình trạng</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (driverAlerts.length === 0) { %>
+            <tr><td colspan="6" style="text-align: center; color: var(--success); padding: 1.5rem;">🎉 Tất cả tài xế đều có bằng lái xe còn hạn dài!</td></tr>
+          <% } %>
+          <% driverAlerts.forEach(d => { %>
+            <tr>
+              <td><strong><%= d.full_name %></strong></td>
+              <td><%= d.username %></td>
+              <td><code><%= d.license_number %></code></td>
+              <td><span class="badge" style="background: #f1f5f9; color: #334155;">Hạng <%= d.license_class %></span></td>
+              <td><strong><%= new Date(d.license_expiry).toLocaleDateString('vi-VN') %></strong></td>
+              <td>
+                <% if (d.license_days_left < 0) { %>
+                  <span class="badge badge-danger">ĐÃ HẾT HẠN <%= Math.abs(d.license_days_left) %> NGÀY</span>
+                <% } else { %>
+                  <span class="badge badge-warning">HẾT HẠN TRONG <%= d.license_days_left %> NGÀY</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

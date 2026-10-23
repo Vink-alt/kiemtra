@@ -1,0 +1,42 @@
+<nav class="navbar">
+  <a href="/" class="navbar-brand">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 16H9m10 0h3v-3.5L18.5 7H15M5 16H2V6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10m-8 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Zm12 0a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/></svg>
+    Fleet<span>DevOps</span>
+  </a>
+
+  <% if (locals.user) { %>
+    <ul class="nav-links">
+      <% if (user.role === 'driver') { %>
+        <li><a href="/trips/driver" class="<%= currentPath === '/trips/driver' ? 'active' : '' %>">Chuyến xe của tôi</a></li>
+        <li><a href="/vehicles" class="<%= currentPath.startsWith('/vehicles') ? 'active' : '' %>">Danh sách xe</a></li>
+        <li><a href="/fuel" class="<%= currentPath.startsWith('/fuel') ? 'active' : '' %>">Nhiên liệu</a></li>
+      <% } else { %>
+        <li><a href="/vehicles" class="<%= currentPath.startsWith('/vehicles') ? 'active' : '' %>">Đội xe</a></li>
+        <li><a href="/trips" class="<%= currentPath.startsWith('/trips') ? 'active' : '' %>">Điều phối chuyến</a></li>
+        <li><a href="/fuel" class="<%= currentPath.startsWith('/fuel') ? 'active' : '' %>">Nhiên liệu</a></li>
+        <li><a href="/maintenance" class="<%= currentPath.startsWith('/maintenance') ? 'active' : '' %>">Bảo dưỡng</a></li>
+        <li><a href="/alerts" class="<%= currentPath.startsWith('/alerts') ? 'active' : '' %>" style="color: #fca5a5; font-weight: 700;">⚠️ Cảnh báo hạn</a></li>
+        <li><a href="/kpi" class="<%= currentPath.startsWith('/kpi') ? 'active' : '' %>">Báo cáo KPI</a></li>
+        <% if (user.role === 'admin') { %>
+          <li><a href="/admin/users" class="<%= currentPath.startsWith('/admin/users') ? 'active' : '' %>">Tài khoản</a></li>
+          <li><a href="/admin/vehicle-types" class="<%= currentPath.startsWith('/admin/vehicle-types') ? 'active' : '' %>">Loại xe</a></li>
+        <% } %>
+      <% } %>
+    </ul>
+
+    <div class="user-menu">
+      <div style="text-align: right;">
+        <div style="font-weight: 600; font-size: 0.9rem;"><%= user.full_name %></div>
+        <span class="badge-role role-<%= user.role %>"><%= user.role %></span>
+      </div>
+      <form action="/logout" method="POST" style="margin: 0;">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-outline btn-sm" style="color: #cbd5e1; border-color: #475569;">Đăng xuất</button>
+      </form>
+    </div>
+  <% } else { %>
+    <div class="nav-links">
+      <a href="/login" class="btn btn-primary btn-sm">Đăng nhập</a>
+    </div>
+  <% } %>
+</nav>

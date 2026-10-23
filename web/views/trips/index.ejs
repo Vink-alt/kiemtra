@@ -1,0 +1,95 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container">
+  <%- include('../partials/alerts') %>
+
+  <div class="card-header" style="border: none; padding: 0; margin-bottom: 1.5rem;">
+    <div>
+      <h1 class="card-title" style="font-size: 1.75rem;">Điều phối & Quản lý Chuyến xe</h1>
+      <p style="color: var(--muted); font-size: 0.9rem;">Danh sách các lệnh điều xe trong toàn bộ hệ thống</p>
+    </div>
+    <a href="/trips/create" class="btn btn-primary">+ Tạo lệnh điều xe mới</a>
+  </div>
+
+  <div class="card" style="padding: 1rem 1.25rem;">
+    <form action="/trips" method="GET" class="form-grid" style="align-items: flex-end;">
+      <div>
+        <label class="form-label">Tìm kiếm</label>
+        <input type="text" name="search" class="form-control" placeholder="Mã chuyến, biển số, tài xế..." value="<%= filters.search || '' %>">
+      </div>
+      <div>
+        <label class="form-label">Trạng thái chuyến</label>
+        <select name="status" class="form-control">
+          <option value="">-- Tất cả trạng thái --</option>
+          <option value="planned" <%= filters.status === 'planned' ? 'selected' : '' %>>Chờ thực hiện (planned)</option>
+          <option value="in_progress" <%= filters.status === 'in_progress' ? 'selected' : '' %>>Đang thực hiện (in_progress)</option>
+          <option value="completed" <%= filters.status === 'completed' ? 'selected' : '' %>>Đã hoàn thành (completed)</option>
+          <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Đã hủy (cancelled)</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 0.5rem;">
+        <button type="submit" class="btn btn-primary" style="flex: 1;">Lọc danh sách</button>
+        <a href="/trips" class="btn btn-outline">Đặt lại</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Mã chuyến</th>
+            <th>Phương tiện</th>
+            <th>Tài xế</th>
+            <th>Lộ trình & Mục đích</th>
+            <th>Thời gian dự kiến</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (trips.length === 0) { %><tr><td colspan="7" style="text-align: center; color: var(--muted);">Không có chuyến xe nào</td></tr><% } %>
+          <% trips.forEach(t => { %>
+            <tr>
+              <td>
+                <strong><%= t.trip_code %></strong><br>
+                <small style="color: var(--muted);">Tạo bởi: <%= t.creator_name %></small>
+              </td>
+              <td>
+                <span class="vehicle-plate" style="font-size: 0.95rem;"><%= t.plate_number %></span><br>
+                <small><%= t.make %> <%= t.model %></small>
+              </td>
+              <td><strong><%= t.driver_name %></strong></td>
+              <td>
+                <div><%= t.origin %> &rarr; <strong><%= t.destination %></strong></div>
+                <% if (t.purpose) { %><small style="color: var(--slate);"><%= t.purpose %></small><% } %>
+                <% if (t.cancel_reason) { %><div style="color: var(--danger); font-size: 0.8rem; margin-top: 0.2rem;">Lý do hủy: <%= t.cancel_reason %></div><% } %>
+              </td>
+              <td>
+                <div><%= new Date(t.planned_start).toLocaleString('vi-VN') %></div>
+                <small style="color: var(--muted);">Đến: <%= new Date(t.planned_end).toLocaleString('vi-VN') %></small>
+              </td>
+              <td><span class="badge badge-<%= t.status %>"><%= t.status %></span></td>
+              <td>
+                <div style="display: flex; gap: 0.4rem; align-items: center;">
+                  <a href="/trips/<%= t.id %>/print" class="btn btn-outline btn-sm" target="_blank" title="In lệnh điều xe">🖨️ In lệnh</a>
+                  <% if (t.status === 'planned') { %>
+                    <form action="/trips/<%= t.id %>/cancel" method="POST" onsubmit="const r = prompt('Nhập lý do hủy chuyến:'); if(!r) return false; this.cancel_reason.value = r; return true;" style="margin: 0;">
+                      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                      <input type="hidden" name="cancel_reason" value="">
+                      <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
+                    </form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

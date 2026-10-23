@@ -1,0 +1,96 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+
+<div class="container" style="max-width: 700px;">
+  <%- include('../partials/alerts') %>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Tạo mới Tài khoản Hệ thống</h2>
+      <a href="/admin/users" class="btn btn-outline btn-sm">&larr; Hủy</a>
+    </div>
+
+    <form action="/admin/users/create" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label" for="username">Tên đăng nhập * (viết liền không dấu)</label>
+          <input type="text" id="username" name="username" class="form-control" placeholder="taixe05, dieuphoi03..." required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Địa chỉ Email *</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="user@fleet.local" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Mật khẩu khởi tạo *</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Tối thiểu 6 ký tự" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="full_name">Họ và tên đầy đủ *</label>
+          <input type="text" id="full_name" name="full_name" class="form-control" placeholder="Nguyễn Văn A" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Số điện thoại</label>
+          <input type="text" id="phone" name="phone" class="form-control" placeholder="0912345678">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="role">Vai trò (Role) *</label>
+          <select id="role" name="role" class="form-control" required onchange="toggleDriverFields(this.value)">
+            <option value="driver">Tài xế (driver)</option>
+            <option value="dispatcher">Điều phối viên (dispatcher)</option>
+            <option value="admin">Quản trị viên (admin)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TRƯỜNG DÀNH RIÊNG CHO TÀI XẾ -->
+      <div id="driver_fields" style="background: #f8fafc; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; margin: 1rem 0;">
+        <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--primary);">Thông tin Giấy phép Lái xe (Bắt buộc đối với Tài xế)</h4>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="license_number">Số bằng lái (GPLX)</label>
+            <input type="text" id="license_number" name="license_number" class="form-control" placeholder="GPLX-098765432">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="license_class">Hạng bằng lái</label>
+            <select id="license_class" name="license_class" class="form-control">
+              <option value="B2">B2 (Xe con &le; 9 chỗ, tải &le; 3.5T)</option>
+              <option value="C">C (Xe tải &gt; 3.5T)</option>
+              <option value="D">D (Xe khách 10-30 chỗ)</option>
+              <option value="E">E (Xe khách &gt; 30 chỗ)</option>
+              <option value="FC">FC (Xe đầu kéo container)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="license_expiry">Ngày hết hạn bằng lái</label>
+            <input type="date" id="license_expiry" name="license_expiry" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end; gap: 1rem;">
+        <a href="/admin/users" class="btn btn-outline">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary">Xác nhận tạo tài khoản</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleDriverFields(role) {
+    const df = document.getElementById('driver_fields');
+    if (role === 'driver') {
+      df.style.display = 'block';
+    } else {
+      df.style.display = 'none';
+    }
+  }
+</script>
+
+<%- include('../partials/footer') %>
