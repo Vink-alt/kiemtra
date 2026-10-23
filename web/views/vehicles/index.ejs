@@ -72,7 +72,7 @@
     <% } %>
     <% vehicles.forEach(v => { %>
       <div class="vehicle-card">
-        <img src="<%= v.image_path || '/images/vehicles/sedan.svg' %>" alt="<%= v.plate_number %>" class="vehicle-card-img">
+        <img src="<%= v.image_path || '/images/vehicles/sedan.svg' %>" alt="<%= v.plate_number %>" class="vehicle-card-img" onerror="this.onerror=null;this.src='/images/vehicles/sedan.svg';">
         <div class="vehicle-card-body">
           <div>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">

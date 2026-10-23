@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-BASE_URL="http://127.0.0.1:3000"
-PGADMIN_URL="http://127.0.0.1:5050"
+if command curl -s --connect-timeout 2 "http://127.0.0.1:3000/health" > /dev/null 2>&1; then
+  BASE_URL="http://127.0.0.1:3000"
+  PGADMIN_URL="http://127.0.0.1:5050"
+else
+  BASE_URL="https://localhost"
+  PGADMIN_URL="https://localhost/pgadmin/"
+fi
+
+curl() {
+  command curl -k "$@"
+}
+
 EVIDENCE_FILE="/home/lucka/fleet/evidence/buoc12-web-db.txt"
 
 echo "================================================================================" > "$EVIDENCE_FILE"

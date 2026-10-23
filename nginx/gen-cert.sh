@@ -27,7 +27,7 @@ openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
   -subj "/C=VN/ST=Hanoi/L=Hanoi/O=Fleet DevOps/OU=IT/CN=localhost" \
   -addext "subjectAltName = ${SAN}"
 
-chmod 600 "${CERTS_DIR}/server.key"
+chmod 644 "${CERTS_DIR}/server.key"
 chmod 644 "${CERTS_DIR}/server.crt"
 
 echo "[gen-cert] Khởi tạo chứng chỉ thành công!"
